@@ -30,6 +30,13 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name=".gcm.GcmReceiver">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="io.github.bananapp.httone" />
+            </intent-filter>
+        </receiver>
+
         <service android:name="io.github.bananapp.httone.geofence.ReceiveTransitionsIntentService" android:exported="false"/>
     </application>
 
