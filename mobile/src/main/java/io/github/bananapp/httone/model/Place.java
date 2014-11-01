@@ -9,7 +9,8 @@ import org.parceler.ParcelConstructor;
 @Parcel(Serialization.METHOD)
 public class Place {
 
-    private String mId;
+    @SerializedName("id")
+    private int mId;
 
     @SerializedName("latitude")
     private double mLat;
@@ -31,12 +32,12 @@ public class Place {
         mLong = aLong;
         mRadius = radius;
         mName = name;
-        mId = id;
+        mId = Integer.parseInt(id);
     }
 
     public String getId() {
 
-        return mId;
+        return Integer.toString(mId);
     }
 
     public double getLat() {

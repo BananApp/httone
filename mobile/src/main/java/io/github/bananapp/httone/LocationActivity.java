@@ -31,6 +31,7 @@ import com.google.android.gms.location.Geofence;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -448,12 +449,20 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
             @Override
             public void success(final List<Place> places, final Response response) {
 
-                final ArrayList<SimpleGeofence> geofences =
-                        new ArrayList<SimpleGeofence>(places.size());
+                final List<SimpleGeofence> geofences;
 
-                for (final Place place : places) {
+                if (places != null) {
 
-                    geofences.add(SimpleGeofence.newGeofence(place));
+                    geofences = new ArrayList<SimpleGeofence>(places.size());
+
+                    for (final Place place : places) {
+
+                        geofences.add(SimpleGeofence.newGeofence(place));
+                    }
+
+                } else {
+
+                    geofences = Collections.emptyList();
                 }
 
                 final ArrayList<String> idsToRemove = new ArrayList<String>();

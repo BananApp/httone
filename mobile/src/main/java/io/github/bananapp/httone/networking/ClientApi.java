@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.github.bananapp.httone.model.Place;
 import io.github.bananapp.httone.model.UserAccount;
+import io.github.bananapp.httone.model.UserInfo;
 import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.GET;
@@ -21,6 +22,9 @@ public interface ClientApi {
 
     @GET("/places/")
     public void getPlaces(Callback<List<Place>> callback);
+
+    @GET("/users/status/")
+    public void getUserInfos(Callback<List<UserInfo>> callback);
 
     @PUT("/places/{id}")
     public void notifyPlace(@Path("id") String placeId,

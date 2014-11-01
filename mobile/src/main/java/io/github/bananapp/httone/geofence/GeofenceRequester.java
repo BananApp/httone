@@ -112,7 +112,7 @@ public class GeofenceRequester
         mCurrentGeofences = (ArrayList<Geofence>) geofences;
 
         // If a request is not already in progress
-        if (!mInProgress) {
+        if (!mInProgress && !mCurrentGeofences.isEmpty()) {
 
             // Toggle the flag and continue
             mInProgress = true;
