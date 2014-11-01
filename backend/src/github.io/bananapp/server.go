@@ -17,24 +17,43 @@ func init() {
 	m.Use(martini.Logger())
 	m.Use(render.Renderer())
 
-	m.Group("/place", func(r martini.Router) {
+	m.Group("/places", func(r martini.Router) {
 		r.Post("/", binding.Bind(Place{}), NewPlace)
+		r.Get("/", ListPlaces)
 	})
 
 	http.Handle("/", m)
+}
+
+func ListPlaces(c appengine.Context, r render.Render) {
+
+	q := datastore.NewQuery("place")
+
+	var places []Place
+	keys, err := q.GetAll(c, &places)
+
+	for index, element := range keys {
+		places[index].SetId(element.IntID())
+	}
+
+	if err != nil {
+		r.Error(500)
+	}
+
+	r.JSON(200, places)
 }
 
 func NewPlace(c appengine.Context, r render.Render, place Place) {
 
 	key := datastore.NewIncompleteKey(c, "place", nil)
 
-	place.SetId(key.Encode())
-
 	key, err := datastore.Put(c, key, &place)
 
 	if err != nil {
 		r.Error(500)
 	}
+
+	place.SetId(key.IntID())
 
 	r.JSON(200, place)
 }
