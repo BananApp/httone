@@ -10,10 +10,10 @@
     </style>
 
     <style name="ButtonStyle">
-        <item name="android:textColor" >#ff6fe51d</item>
+        <item name="android:textColor" >#A4C739</item>
     </style>
 
     <style name="ToolbarStyle">
-        <item name="android:background" >#ff6fe51d</item>
+        <item name="android:background" >#A4C739</item>
     </style>
 </resources>
