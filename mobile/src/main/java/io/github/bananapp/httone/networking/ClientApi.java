@@ -11,6 +11,8 @@ import retrofit.http.Path;
 
 public interface ClientApi {
 
+    public final static String ENDPOINT = "https://bananapp-httone.appspot.com/";
+
     @POST("/places")
     public void createPlace(@Body Place place, Callback<String> callback);
 

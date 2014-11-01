@@ -69,6 +69,8 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
     // Add geofences handler
     private GeofenceRequester mGeofenceRequester;
 
+    private List<SimpleGeofence> mGeofences;
+
     // An intent filter for the broadcast receiver
     private IntentFilter mIntentFilter;
 
@@ -82,8 +84,6 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
 
     // Store the current request
     private REQUEST_TYPE mRequestType;
-
-    private List<SimpleGeofence> mGeofences;
 
     @Override
     public void onLocationFailure() {
@@ -136,8 +136,9 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
 
         mLocationService = new GeoLocationService(this);
 
-        final RestAdapter restAdapter =
-                new RestAdapter.Builder().setEndpoint(endpoint).setLogLevel(LogLevel.BASIC).build();
+        final RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(ClientApi.ENDPOINT)
+                                                                 .setLogLevel(LogLevel.BASIC)
+                                                                 .build();
 
         mClientApi = restAdapter.create(ClientApi.class);
 
@@ -198,71 +199,6 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
         });
 
         updatePlaces();
-    }
-
-    private void updatePlaces() {
-
-        mClientApi.getPlaces(new Callback<List<Place>>() {
-
-            @Override
-            public void success(final List<Place> places, final Response response) {
-
-                final ArrayList<SimpleGeofence> geofences = new ArrayList<SimpleGeofence>(places.size());
-
-                for (final Place place : places) {
-
-                    geofences.add(SimpleGeofence.newGeofence(place));
-                }
-
-                final ArrayList<String> idsToRemove = new ArrayList<String>();
-                final Iterator<SimpleGeofence> iterator = mGeofences.iterator();
-
-                while (iterator.hasNext()) {
-
-                    final SimpleGeofence geofence = iterator.next();
-
-                    if (!geofences.contains(geofence)) {
-
-                        idsToRemove.add(geofence.getId());
-                        iterator.remove();
-                    }
-                }
-
-                if (!idsToRemove.isEmpty()) {
-
-                    mGeofenceRemover.removeGeofencesById(idsToRemove);
-                }
-
-                for (SimpleGeofence geofence : geofences) {
-
-                    if (!mGeofences.contains(geofence)) {
-
-                        mGeofences.add(geofence);
-                    }
-                }
-
-                for (SimpleGeofence geofence : mGeofences) {
-
-                    mCurrentGeofences.add(geofence.toGeofence());
-                }
-
-                try {
-                    // Try to add geofences
-                    mGeofenceRequester.addGeofences(mCurrentGeofences);
-
-                } catch (UnsupportedOperationException e) {
-                    // Notify user that previous request hasn't finished.
-                    Toast.makeText(LocationActivity.this,
-                                   R.string.add_geofences_already_requested_error,
-                                   Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void failure(final RetrofitError error) {
-
-            }
-        });
     }
 
     @Override
@@ -401,6 +337,72 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
             }
             return false;
         }
+    }
+
+    private void updatePlaces() {
+
+        mClientApi.getPlaces(new Callback<List<Place>>() {
+
+            @Override
+            public void success(final List<Place> places, final Response response) {
+
+                final ArrayList<SimpleGeofence> geofences =
+                        new ArrayList<SimpleGeofence>(places.size());
+
+                for (final Place place : places) {
+
+                    geofences.add(SimpleGeofence.newGeofence(place));
+                }
+
+                final ArrayList<String> idsToRemove = new ArrayList<String>();
+                final Iterator<SimpleGeofence> iterator = mGeofences.iterator();
+
+                while (iterator.hasNext()) {
+
+                    final SimpleGeofence geofence = iterator.next();
+
+                    if (!geofences.contains(geofence)) {
+
+                        idsToRemove.add(geofence.getId());
+                        iterator.remove();
+                    }
+                }
+
+                if (!idsToRemove.isEmpty()) {
+
+                    mGeofenceRemover.removeGeofencesById(idsToRemove);
+                }
+
+                for (SimpleGeofence geofence : geofences) {
+
+                    if (!mGeofences.contains(geofence)) {
+
+                        mGeofences.add(geofence);
+                    }
+                }
+
+                for (SimpleGeofence geofence : mGeofences) {
+
+                    mCurrentGeofences.add(geofence.toGeofence());
+                }
+
+                try {
+                    // Try to add geofences
+                    mGeofenceRequester.addGeofences(mCurrentGeofences);
+
+                } catch (UnsupportedOperationException e) {
+                    // Notify user that previous request hasn't finished.
+                    Toast.makeText(LocationActivity.this,
+                                   R.string.add_geofences_already_requested_error,
+                                   Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void failure(final RetrofitError error) {
+
+            }
+        });
     }
 
     /**
