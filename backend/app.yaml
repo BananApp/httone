@@ -1,4 +1,4 @@
-application: httone
+application: bananapp-httone
 version: 1
 runtime: go
 api_version: go1
