@@ -56,7 +56,7 @@ public class GeoLocationService implements LocationListener {
         mCallback = callback;
 
         Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_HIGH);
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
         criteria.setAltitudeRequired(false);
         criteria.setSpeedRequired(false);
 

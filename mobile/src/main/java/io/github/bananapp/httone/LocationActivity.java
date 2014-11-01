@@ -1,12 +1,15 @@
 package io.github.bananapp.httone;
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -18,11 +21,15 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.ErrorDialogFragment;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +44,7 @@ import io.github.bananapp.httone.geofence.SimpleGeofenceStore;
 import io.github.bananapp.httone.geolocation.GeoLocationService;
 import io.github.bananapp.httone.geolocation.GeoLocationService.GeoLocationCallback;
 import io.github.bananapp.httone.model.Place;
+import io.github.bananapp.httone.model.UserAccount;
 import io.github.bananapp.httone.networking.ClientApi;
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -47,10 +55,16 @@ import retrofit.client.Response;
 
 public class LocationActivity extends Activity implements GeoLocationCallback {
 
+    private static final String KEY_ACCOUNT_NAME = "KEY_ACCOUNT_NAME";
+
+    private static final int RC_PICK_GOOGLE_ACCOUNT = 33;
+
+    private String mAccountName;
+
     /*
-     * An instance of an inner class that receives broadcasts from listeners and from the
-     * IntentService that receives geofence transition events
-     */
+         * An instance of an inner class that receives broadcasts from listeners and from the
+         * IntentService that receives geofence transition events
+         */
     private GeofenceSampleReceiver mBroadcastReceiver;
 
     private ClientApi mClientApi;
@@ -198,16 +212,20 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
             }
         });
 
-        updatePlaces();
+        getAccount();
     }
 
     @Override
     protected void onResume() {
 
         super.onResume();
+
+        if (!servicesConnected()) {
+
+            return;
+        }
+
         mGeofences = mPrefs.getGeofences();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
-        mLocationService.requestLocation(this);
     }
 
     @Override
@@ -297,7 +315,18 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
                         Log.d(GeofenceUtils.APPTAG, getString(R.string.no_resolution));
                 }
 
-                // If any other request code was received
+                break;
+
+            case RC_PICK_GOOGLE_ACCOUNT:
+
+                if (resultCode == Activity.RESULT_OK) {
+
+                    onUserAccount(intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+                }
+
+                break;
+
+            // If any other request code was received
             default:
                 // Report that this Activity received an unknown requestCode
                 Log.d(GeofenceUtils.APPTAG,
@@ -305,6 +334,65 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
 
                 break;
         }
+    }
+
+    private void getAccount() {
+
+        final SharedPreferences prefs = getSharedPreferences("httone", Context.MODE_PRIVATE);
+        final String accountName = prefs.getString(KEY_ACCOUNT_NAME, null);
+
+        if (!TextUtils.isEmpty(accountName)) {
+
+            setAccount(accountName);
+
+            return;
+        }
+
+        String[] accountTypes = new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE};
+
+        Intent intent =
+                AccountPicker.newChooseAccountIntent(null, null, accountTypes, BuildConfig.DEBUG,
+                                                     null, null, null, null);
+
+        startActivityForResult(intent, RC_PICK_GOOGLE_ACCOUNT);
+    }
+
+    private void onUserAccount(final String accountName) {
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(final Void... params) {
+
+                try {
+
+                    final String registerId =
+                            GoogleCloudMessaging.getInstance(LocationActivity.this)
+                                                .register(accountName);
+
+                    mClientApi.registerAccount(new UserAccount(accountName, registerId),
+                                               new Callback<Void>() {
+
+                                                   @Override
+                                                   public void success(final Void aVoid,
+                                                           final Response response) {
+
+                                                       setAccount(accountName);
+                                                   }
+
+                                                   @Override
+                                                   public void failure(final RetrofitError error) {
+
+                                                   }
+                                               });
+
+                } catch (final IOException ignored) {
+
+                }
+
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -337,6 +425,20 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
             }
             return false;
         }
+    }
+
+    private void setAccount(final String accountName) {
+
+        final SharedPreferences prefs = getSharedPreferences("httone", Context.MODE_PRIVATE);
+
+        prefs.edit().putString(KEY_ACCOUNT_NAME, accountName).apply();
+
+        mAccountName = accountName;
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
+        mLocationService.requestLocation(this);
+
+        updatePlaces();
     }
 
     private void updatePlaces() {
@@ -478,6 +580,46 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
              * here. The current design of the app uses a notification to inform the
              * user that a transition has occurred.
              */
+            final int transition = intent.getIntExtra(GeofenceUtils.EXTRA_GEOFENCE_TRANSITION, -1);
+
+            if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+
+                mClientApi.notifyPlace("NOWHERE", mAccountName, new Callback<Void>() {
+
+                    @Override
+                    public void success(final Void aVoid, final Response response) {
+
+                    }
+
+                    @Override
+                    public void failure(final RetrofitError error) {
+
+                    }
+                });
+
+            } else {
+
+                final ArrayList<String> ids =
+                        intent.getStringArrayListExtra(GeofenceUtils.EXTRA_GEOFENCE_IDS);
+
+                if (!ids.isEmpty()) {
+
+                    final String id = ids.get(0);
+
+                    mClientApi.notifyPlace(id, mAccountName, new Callback<Void>() {
+
+                        @Override
+                        public void success(final Void aVoid, final Response response) {
+
+                        }
+
+                        @Override
+                        public void failure(final RetrofitError error) {
+
+                        }
+                    });
+                }
+            }
         }
     }
 }

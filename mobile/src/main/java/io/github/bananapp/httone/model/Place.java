@@ -1,5 +1,7 @@
 package io.github.bananapp.httone.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.parceler.Parcel;
 import org.parceler.Parcel.Serialization;
 import org.parceler.ParcelConstructor;
@@ -9,12 +11,16 @@ public class Place {
 
     private String mId;
 
+    @SerializedName("latitude")
     private double mLat;
 
+    @SerializedName("longitude")
     private double mLong;
 
+    @SerializedName("name")
     private String mName;
 
+    @SerializedName("radius")
     private double mRadius;
 
     @ParcelConstructor

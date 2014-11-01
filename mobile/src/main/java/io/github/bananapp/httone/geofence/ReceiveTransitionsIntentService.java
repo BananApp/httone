@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.github.bananapp.httone.R;
@@ -92,6 +93,17 @@ public class ReceiveTransitionsIntentService extends IntentService {
                 Log.e(GeofenceUtils.APPTAG,
                       getString(R.string.geofence_transition_invalid_type, transition));
             }
+
+            final ArrayList<String> ids = new ArrayList<String>();
+
+            for (final Geofence geofence : LocationClient.getTriggeringGeofences(intent)) {
+
+                ids.add(geofence.getRequestId());
+            }
+
+            broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_TRANSITION)
+                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_TRANSITION, transition)
+                           .putStringArrayListExtra(GeofenceUtils.EXTRA_GEOFENCE_IDS, ids);
         }
     }
 
