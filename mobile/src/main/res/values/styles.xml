@@ -4,4 +4,16 @@
         <item name="colorPrimaryDark">@color/material_blue_grey_900</item>
         <item name="colorAccent">@color/accent_material_light</item>
     </style>
+
+    <style name="TextHint" >
+        <item name="android:textColorHint" >#ffafbab5</item>
+    </style>
+
+    <style name="ButtonStyle">
+        <item name="android:textColor" >#ff6fe51d</item>
+    </style>
+
+    <style name="ToolbarStyle">
+        <item name="android:background" >#ff6fe51d</item>
+    </style>
 </resources>

@@ -26,5 +26,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:+'
     compile "com.squareup.retrofit:retrofit:1.6.1"
     compile "org.parceler:parceler-api:0.2.12"
-    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:appcompat-v7:21.0.0'
 }

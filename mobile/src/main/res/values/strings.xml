@@ -116,4 +116,8 @@
     <string name="connection_error_outdated">Google Play services is out of date</string>
     <string name="connection_error_sign_in_required">The user is not signed in</string>
     <string name="connection_error_unknown">An unknown error occurred</string>
+
+
+    <string name="place_name">Place name</string>
+    <string name="save_place">Save</string>
 </resources>

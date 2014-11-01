@@ -18,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -157,6 +159,8 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
 
         mClientApi = restAdapter.create(ClientApi.class);
 
+        final Animation animation_save_button = AnimationUtils.loadAnimation(this, R.anim.scale);
+
         final EditText name = (EditText) findViewById(R.id.editText);
 
         final View button = findViewById(R.id.button);
@@ -168,6 +172,8 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
                 final Location location = mCurrentLocation;
 
                 if (location != null) {
+
+                    v.startAnimation(animation_save_button);
 
                     final String placeName = name.getText().toString();
 
