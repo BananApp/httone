@@ -23,4 +23,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     wearApp project(':wear')
     compile 'com.google.android.gms:play-services:+'
+    compile "com.squareup.retrofit:retrofit:1.6.1"
+    compile "org.parceler:parceler-api:0.2.12"
 }
