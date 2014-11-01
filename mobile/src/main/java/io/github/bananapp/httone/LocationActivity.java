@@ -375,7 +375,7 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
 
                     final String registerId =
                             GoogleCloudMessaging.getInstance(LocationActivity.this)
-                                                .register(accountName);
+                                                .register("832095141376");
 
                     mClientApi.registerAccount(new UserAccount(accountName, registerId),
                                                new Callback<Void>() {
