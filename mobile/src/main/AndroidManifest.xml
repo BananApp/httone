@@ -38,6 +38,7 @@
         </receiver>
 
         <service android:name="io.github.bananapp.httone.geofence.ReceiveTransitionsIntentService" android:exported="false"/>
+        <service android:name="io.github.bananapp.httone.gcm.GcmIntentService" android:exported="false"/>
     </application>
 
 </manifest>

@@ -2,17 +2,18 @@ package io.github.bananapp.httone.gcm;
 
 import android.app.IntentService;
 import android.app.Notification;
-import android.app.Notification.Builder;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat.Builder;
+import android.support.v4.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 
 import java.util.List;
 
 import io.github.bananapp.httone.LocationActivity;
+import io.github.bananapp.httone.R;
 import io.github.bananapp.httone.model.UserInfo;
 import io.github.bananapp.httone.networking.ClientApi;
 import retrofit.Callback;
@@ -28,14 +29,9 @@ public class GcmIntentService extends IntentService {
 
     public static final String EXTRA_USER_INFO = "io.github.bananapp.httone.gcm.EXTRA_USER_INFO";
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public GcmIntentService(final String name) {
+    public GcmIntentService() {
 
-        super(name);
+        super("gcm_service");
     }
 
     @Override
@@ -60,16 +56,27 @@ public class GcmIntentService extends IntentService {
                 viewIntent.putExtra(EXTRA_USER_INFO, json);
                 final PendingIntent viewPendingIntent =
                         PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
+                final Intent intentMap = new Intent(Intent.ACTION_VIEW);
+                final Uri uri = Uri.parse("geo:0,0=?q=51.524559,-0.099096");
+                intentMap.setData(uri);
 
+                final PendingIntent farePendingIntent =
+                        PendingIntent.getActivity(getApplicationContext(), 0, intentMap, 0);
+
+                final Builder builder = new Builder(GcmIntentService.this);
                 final Notification notification =
-                        new Builder(GcmIntentService.this).setContentIntent(viewPendingIntent)
-                                                          .build();
+                        builder.setSmallIcon(R.drawable.abc_ic_commit_search_api_mtrl_alpha)
+                               .setContentTitle("SOCCAZZI")
+                               .setContentText("HOGIAMMANGIATO!!!")
+                               .setContentIntent(viewPendingIntent)
+                               .addAction(R.drawable.abc_ab_share_pack_holo_light, "FARE!",
+                                          farePendingIntent)
+                               .build();
 
-                final NotificationManager manager =
-                        (NotificationManager) getApplicationContext().getSystemService(
-                                Context.NOTIFICATION_SERVICE);
+                final NotificationManagerCompat manager =
+                        NotificationManagerCompat.from(getApplicationContext());
 
-                manager.notify(0, notification);
+                manager.notify(1, notification);
 
                 GcmReceiver.completeWakefulIntent(intent);
             }
