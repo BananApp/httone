@@ -179,7 +179,7 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
 
                     final Place place =
                             new Place(location.getLatitude(), location.getLongitude(), 10,
-                                      placeName, "");
+                                      placeName, "0");
 
                     mClientApi.createPlace(place, new Callback<String>() {
 

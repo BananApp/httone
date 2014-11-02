@@ -81,6 +81,31 @@ public class SimpleGeofence {
                                           | Geofence.GEOFENCE_TRANSITION_EXIT);
     }
 
+    @Override
+    public boolean equals(final Object o) {
+
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SimpleGeofence)) {
+            return false;
+        }
+
+        final SimpleGeofence that = (SimpleGeofence) o;
+
+        if (!mId.equals(that.mId)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return mId.hashCode();
+    }
+
     /**
      * Get the geofence expiration duration
      *
@@ -146,31 +171,6 @@ public class SimpleGeofence {
         return mTransitionType;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof SimpleGeofence)) {
-            return false;
-        }
-
-        final SimpleGeofence that = (SimpleGeofence) o;
-
-        if (!mId.equals(that.mId)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return mId.hashCode();
-    }
-
     /**
      * Creates a Location Services Geofence object from a
      * SimpleGeofence.
@@ -180,6 +180,7 @@ public class SimpleGeofence {
     public Geofence toGeofence() {
         // Build a new Geofence object
         return new Geofence.Builder().setRequestId(getId())
+                                     .setLoiteringDelay(60000)
                                      .setTransitionTypes(mTransitionType)
                                      .setCircularRegion(getLatitude(), getLongitude(), getRadius())
                                      .setExpirationDuration(mExpirationDuration)
