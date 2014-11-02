@@ -16,6 +16,10 @@ func init() {
 	m.Use(martini.Logger())
 	m.Use(render.Renderer())
 
+	m.Get("/", func() string {
+		return "Nothing to see here"
+	})
+
 	m.Group("/places", func(r martini.Router) {
 		r.Post("/", binding.Bind(Place{}), NewPlace)
 		r.Get("/", ListPlaces)
@@ -25,6 +29,7 @@ func init() {
 	m.Group("/users", func(r martini.Router) {
 		r.Get("/status", ListUserStatus)
 		r.Post("/", binding.Bind(User{}), CreateUser)
+		r.Post("/notify/:id", binding.Bind(Message{}), NotifyMessage)
 	})
 
 	m.Group("/push", func(r martini.Router) {

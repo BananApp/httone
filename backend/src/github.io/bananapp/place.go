@@ -77,8 +77,6 @@ func EnterPlace(req *http.Request, params martini.Params, c appengine.Context, r
 
 	if len(user) != 0 {
 
-		//TODO valide place exists
-
 		err := RegisterPlaceEnter(c, id, user)
 
 		if err != nil {
@@ -87,7 +85,7 @@ func EnterPlace(req *http.Request, params martini.Params, c appengine.Context, r
 			return
 		}
 
-		NotifyUsers(c)
+		NotifyUsers(c, user)
 
 	} else {
 
@@ -99,8 +97,6 @@ func EnterPlace(req *http.Request, params martini.Params, c appengine.Context, r
 
 func RegisterPlaceEnter(c appengine.Context, placeId string, userId string) error {
 
-	//TODO support previous placeId
-
 	place, err := PlaceById(c, placeId)
 
 	if err != nil {
@@ -108,17 +104,35 @@ func RegisterPlaceEnter(c appengine.Context, placeId string, userId string) erro
 		return err
 	}
 
-	l := UserLocation{
-		UserId:       userId,
-		CurrentPlace: place,
-	}
+	q := datastore.NewQuery("user_location").Filter("UserId =", userId)
 
-	datastore.Put(c, datastore.NewIncompleteKey(c, "user_location", nil), &l)
+	var userLocation []UserLocation
+	keys, err := q.GetAll(c, &userLocation)
+
+	if err != nil || len(userLocation) != 1 {
+
+		l := UserLocation{
+			UserId:       userId,
+			CurrentPlace: place,
+		}
+
+		datastore.Put(c, datastore.NewIncompleteKey(c, "user_location", nil), &l)
+
+	} else {
+
+		l := userLocation[0]
+
+		previous := l.CurrentPlace
+		l.PreviousPlace = previous
+		l.CurrentPlace = place
+
+		datastore.Put(c, keys[0], &l)
+	}
 
 	return nil
 }
 
-func NotifyUsers(c appengine.Context) {
+func NotifyUsers(c appengine.Context, sender string) {
 
 	m := make(map[string]interface{})
 	var regIds []string
@@ -136,12 +150,14 @@ func NotifyUsers(c appengine.Context) {
 			break
 		}
 
-		regIds = append(regIds, u.RegistrationID)
+		if sender != u.Email {
+			regIds = append(regIds, u.RegistrationID)
+		}
 	}
 
 	if len(regIds) > 0 {
 
-		SendPushNotification(c, m, regIds)
+		SendPushNotification(c, m, regIds...)
 
 	} else {
 

@@ -3,6 +3,7 @@ package httone
 import (
 	"appengine"
 	"appengine/datastore"
+	"errors"
 	"fmt"
 	"github.com/martini-contrib/render"
 )
@@ -42,6 +43,22 @@ func CreateUser(c appengine.Context, r render.Render, user User) {
 			r.Error(500)
 			return
 		}
+	}
+}
+
+func FindRegID(c appengine.Context, email string) (string, error) {
+
+	c.Infof("FindRegID %s", email)
+
+	q := datastore.NewQuery("user").Filter("Email =", email)
+
+	var users []User
+	keys, err := q.GetAll(c, &users)
+
+	if len(keys) != 1 || err != nil {
+		return "", errors.New("No such user")
+	} else {
+		return users[0].RegistrationID, nil
 	}
 }
 

@@ -6,7 +6,7 @@ import (
 	"github.com/alexjlockwood/gcm"
 )
 
-func SendPushNotification(c appengine.Context, data map[string]interface{}, regIDs []string) error {
+func SendPushNotification(c appengine.Context, data map[string]interface{}, regIDs ...string) error {
 	client := urlfetch.Client(c)
 	c.Infof("Sending push to: %v", regIDs[0])
 
