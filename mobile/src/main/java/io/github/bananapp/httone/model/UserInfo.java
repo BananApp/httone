@@ -1,5 +1,7 @@
 package io.github.bananapp.httone.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.parceler.Parcel;
 import org.parceler.Parcel.Serialization;
 import org.parceler.ParcelConstructor;
@@ -7,10 +9,13 @@ import org.parceler.ParcelConstructor;
 @Parcel(Serialization.METHOD)
 public class UserInfo {
 
+    @SerializedName("current_place")
     private Place mCurrPlace;
 
+    @SerializedName("previous_place")
     private Place mPrevPlace;
 
+    @SerializedName("user_id")
     private String mUserName;
 
     @ParcelConstructor

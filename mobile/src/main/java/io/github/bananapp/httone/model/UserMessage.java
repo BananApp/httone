@@ -16,7 +16,7 @@ public class UserMessage {
     private String mSender;
 
     @ParcelConstructor
-    public UserMessage(final String message, final String sender) {
+    public UserMessage(final String sender, final String message) {
 
         mMessage = message;
         mSender = sender;

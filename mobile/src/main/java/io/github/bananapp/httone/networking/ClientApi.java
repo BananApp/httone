@@ -8,6 +8,7 @@ import io.github.bananapp.httone.model.UserInfo;
 import io.github.bananapp.httone.model.UserMessage;
 import retrofit.Callback;
 import retrofit.http.Body;
+import retrofit.http.EncodedPath;
 import retrofit.http.GET;
 import retrofit.http.Header;
 import retrofit.http.POST;
@@ -27,8 +28,8 @@ public interface ClientApi {
     @GET("/users/status/")
     public void getUserInfos(Callback<List<UserInfo>> callback);
 
-    @POST("/users/{username}/notify/")
-    public void notifyMessage(@Path("username") String destUserName, @Body UserMessage message,
+    @POST("/users/notify/{username}")
+    public void notifyMessage(@EncodedPath("username") String destUserName, @Body UserMessage message,
             @Header("X-Httone-Authentication") String userName, Callback<Void> callback);
 
     @PUT("/places/{id}")

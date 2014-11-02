@@ -3,7 +3,9 @@ package io.github.bananapp.httone.gcm;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
@@ -12,6 +14,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Contacts.Photo;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationManagerCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -45,6 +48,8 @@ public class GcmIntentService extends IntentService {
     public static final String EXTRA_USER_MESSAGE =
             "io.github.bananapp.httone.gcm.EXTRA_USER_MESSAGE";
 
+    private int mCount = 0;
+
     public GcmIntentService() {
 
         super("gcm_service");
@@ -53,9 +58,10 @@ public class GcmIntentService extends IntentService {
     @Override
     protected void onHandleIntent(final Intent intent) {
 
-        if (intent.hasExtra(EXTRA_USER_MESSAGE)) {
+        final String sender = intent.getStringExtra(EXTRA_SENDER);
 
-            final String sender = intent.getStringExtra(EXTRA_SENDER);
+        if (!TextUtils.isEmpty(sender)) {
+
             final String message = intent.getStringExtra(EXTRA_USER_MESSAGE);
 
             final Intent viewIntent = new Intent(getApplicationContext(), LocationActivity.class);
@@ -124,7 +130,7 @@ public class GcmIntentService extends IntentService {
             final NotificationManagerCompat manager =
                     NotificationManagerCompat.from(getApplicationContext());
 
-            manager.notify(333, notification);
+            manager.notify(333 + ++mCount, notification);
 
             GcmReceiver.completeWakefulIntent(intent);
 
@@ -142,6 +148,9 @@ public class GcmIntentService extends IntentService {
             @Override
             public void success(final List<UserInfo> userInfos, final Response response) {
 
+                final SharedPreferences prefs = getSharedPreferences("httone", Context.MODE_PRIVATE);
+                final String accountName = prefs.getString(LocationActivity.KEY_ACCOUNT_NAME, "");
+
                 final Gson gson = new Gson();
                 final String json = gson.toJson(userInfos);
 
@@ -150,7 +159,7 @@ public class GcmIntentService extends IntentService {
                 viewIntent.putExtra(EXTRA_USER_INFO, json);
 
                 final PendingIntent viewPendingIntent =
-                        PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
+                        PendingIntent.getActivity(getApplicationContext(), 1, viewIntent, 0);
 
                 final Builder builder = new Builder(GcmIntentService.this);
                 builder.setSmallIcon(R.drawable.ic_user_status)
@@ -158,15 +167,27 @@ public class GcmIntentService extends IntentService {
                        .setContentIntent(viewPendingIntent)
                        .setVibrate(new long[]{400, 200, 100});
 
-                if (!userInfos.isEmpty()) {
+                UserInfo userInfo = null;
 
-                    final UserInfo userInfo = userInfos.get(0);
+                for (final UserInfo user : userInfos) {
 
-                    final ContactsManager contactsManager = new ContactsManager(getApplication());
-                    final Cursor cursor = contactsManager.getContacts(userInfo.getUserName());
-                    final Contact contact = contactsManager.getContact(cursor, false);
+                    if (!accountName.equals(user.getUserName())) {
 
-                    builder.setLargeIcon(BitmapFactory.decodeFile(contact.getPhoto()));
+                        userInfo = user;
+
+                        break;
+                    }
+                }
+
+                if (userInfo != null) {
+                    //
+                    //                    final ContactsManager contactsManager = new ContactsManager(getApplication());
+
+                    //                    final Cursor cursor = contactsManager.getContacts(userInfo.getUserName());
+                    //                    final Contact contact = contactsManager.getContact
+                    // (cursor, false);
+                    //
+                    //                    builder.setLargeIcon(BitmapFactory.decodeFile(contact.getPhoto()));
 
                     final Intent intentMessage =
                             new Intent(getApplicationContext(), UserMessageService.class);
@@ -177,7 +198,7 @@ public class GcmIntentService extends IntentService {
                     intentMessage.putExtra(UserMessageService.EXTRA_DEST_MESSAGE, "happy");
 
                     final PendingIntent messagePendingIntent =
-                            PendingIntent.getService(getApplicationContext(), 0, intentMessage, 0);
+                            PendingIntent.getService(getApplicationContext(), 2, intentMessage, 0);
 
                     builder.addAction(R.drawable.smile, "FARE!", messagePendingIntent);
                 }
@@ -186,7 +207,7 @@ public class GcmIntentService extends IntentService {
                 final NotificationManagerCompat manager =
                         NotificationManagerCompat.from(getApplicationContext());
 
-                manager.notify(1, notification);
+                manager.notify(++mCount, notification);
 
                 GcmReceiver.completeWakefulIntent(intent);
             }

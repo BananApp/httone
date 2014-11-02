@@ -15,9 +15,9 @@ import retrofit.client.Response;
 
 public class UserMessageService extends IntentService {
 
-    public static final String EXTRA_DEST_MESSAGE = "dest_message";
+    public static final String EXTRA_DEST_MESSAGE = "service.dest_message";
 
-    public static final String EXTRA_DEST_USER = "dest_user";
+    public static final String EXTRA_DEST_USER = "service.dest_user";
 
     public UserMessageService() {
 
