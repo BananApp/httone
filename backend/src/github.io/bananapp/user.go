@@ -44,3 +44,20 @@ func CreateUser(c appengine.Context, r render.Render, user User) {
 		}
 	}
 }
+
+func ListUserStatus(c appengine.Context, r render.Render) {
+	q := datastore.NewQuery("user_location")
+
+	var userLocation []UserLocation
+	_, err := q.GetAll(c, &userLocation)
+
+	if err != nil {
+		r.Error(500)
+	}
+
+	if userLocation == nil {
+		userLocation = make([]UserLocation, 0)
+	}
+
+	r.JSON(200, userLocation)
+}
