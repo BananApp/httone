@@ -12,6 +12,8 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -56,7 +58,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 
-public class LocationActivity extends Activity implements GeoLocationCallback {
+public class LocationActivity extends ActionBarActivity implements GeoLocationCallback {
 
     private static final String KEY_ACCOUNT_NAME = "KEY_ACCOUNT_NAME";
 
@@ -118,6 +120,14 @@ public class LocationActivity extends Activity implements GeoLocationCallback {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.my_awesome_toolbar);
+
+        toolbar.setLogo(R.drawable.ic_launcher);
+
+        toolbar.setTitle("Always In Touch");
+
+        setSupportActionBar(toolbar);
 
         // Instantiate a new geofence storage area
         mPrefs = new SimpleGeofenceStore(this);

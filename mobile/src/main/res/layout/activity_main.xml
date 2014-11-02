@@ -33,14 +33,9 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/my_awesome_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?android:attr/actionBarSize"
         style="@style/ToolbarStyle"
         android:minHeight="?attr/actionBarSize" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"/>
 
     </android.support.v7.widget.Toolbar>
 
