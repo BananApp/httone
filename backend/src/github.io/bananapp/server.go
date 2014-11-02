@@ -19,11 +19,16 @@ func init() {
 	m.Group("/places", func(r martini.Router) {
 		r.Post("/", binding.Bind(Place{}), NewPlace)
 		r.Get("/", ListPlaces)
+		r.Put("/:id", EnterPlace)
 	})
 
 	m.Group("/users", func(r martini.Router) {
+		r.Get("/status", ListUserStatus)
 		r.Post("/", binding.Bind(User{}), CreateUser)
-		r.Get("/", ListPlaces)
+	})
+
+	m.Group("/push", func(r martini.Router) {
+		r.Get("/test", NotifyUsers)
 	})
 
 	http.Handle("/", m)
