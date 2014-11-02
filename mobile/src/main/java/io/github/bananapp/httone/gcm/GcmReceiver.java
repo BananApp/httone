@@ -22,14 +22,18 @@ public class GcmReceiver extends WakefulBroadcastReceiver {
 
         if (!extras.isEmpty()) {
 
-            if (messageType != null && messageType
-                    .equals(GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE)) {
+            if (messageType != null && messageType.equals(
+                    GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE)) {
 
-                final ComponentName component =
-                        new ComponentName(context.getPackageName(), GcmIntentService.class.getName());
+                final ComponentName component = new ComponentName(context.getPackageName(),
+                                                                  GcmIntentService.class.getName());
 
                 intent.setComponent(component);
                 intent.setAction(GcmIntentService.ACTION_GCM_MESSAGE);
+                intent.putExtra(GcmIntentService.EXTRA_USER_MESSAGE,
+                                intent.getExtras().getString("message"));
+                intent.putExtra(GcmIntentService.EXTRA_SENDER,
+                                intent.getExtras().getString("sender"));
 
                 startWakefulService(context, intent);
             }

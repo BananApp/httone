@@ -60,7 +60,7 @@ import retrofit.client.Response;
 
 public class LocationActivity extends ActionBarActivity implements GeoLocationCallback {
 
-    private static final String KEY_ACCOUNT_NAME = "KEY_ACCOUNT_NAME";
+    public static final String KEY_ACCOUNT_NAME = "KEY_ACCOUNT_NAME";
 
     private static final int RC_PICK_GOOGLE_ACCOUNT = 33;
 

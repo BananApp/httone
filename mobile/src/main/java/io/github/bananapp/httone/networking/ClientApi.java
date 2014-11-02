@@ -5,6 +5,7 @@ import java.util.List;
 import io.github.bananapp.httone.model.Place;
 import io.github.bananapp.httone.model.UserAccount;
 import io.github.bananapp.httone.model.UserInfo;
+import io.github.bananapp.httone.model.UserMessage;
 import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.GET;
@@ -25,6 +26,10 @@ public interface ClientApi {
 
     @GET("/users/status/")
     public void getUserInfos(Callback<List<UserInfo>> callback);
+
+    @POST("/users/{username}/notify/")
+    public void notifyMessage(@Path("username") String destUserName, @Body UserMessage message,
+            @Header("X-Httone-Authentication") String userName, Callback<Void> callback);
 
     @PUT("/places/{id}")
     public void notifyPlace(@Path("id") String placeId,
